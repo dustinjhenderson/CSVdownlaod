@@ -125,10 +125,11 @@ def playlist_items_list_by_playlist_id(service, **kwargs):
   ).execute()
   return(results)
 
-def getTitle(url):
+def getTitle(url):	#Not working. need to do somthing new
 	youtube = etree.HTML(urllib.urlopen(url).read()) #enter your youtube url here
 	video_title = youtube.xpath("//span[@id='eow-title']/@title") #get xpath using firepath firefox addon
-	return ''.join(video_title)
+	print "vid name: "
+	print ''.join(video_title)
 
 def findNextToken (apiResponce):
 	token = ""
@@ -148,11 +149,12 @@ def findVidID (apiResponce):
 	id = ""
 	start = 0
 	end = 0 
-	start = apiResponce.find('videoId\'') + 11
-	end = apiResponce[start:].find('\'')
+	start = apiResponce.find('videoId\'') + 12
+	end = start + 11
 	print "start: ", start
 	print "end: ", end
-	print apiResponce[start:end+start]
+	print "vid ID: ", apiResponce[start:end]
+	return apiResponce[start:end]
 	
 		
 def getFileLocation():
@@ -183,17 +185,19 @@ def getListId():
 playListId = ""
 fileLocation = ""
 token = ""
+videoId = ""
 counter = 0
 lastToken = False
 
 
 fileLocation = getFileLocation()
-print "test id PLYYARuW-EUbEzCScH6unajic_fkaOG7Yv" #my test playlist
+print "test id currently: PLYYARuW-EUbEzCScH6unajic_fkaOG7Yv" #my test playlist
 playListId = getListId()
 apiResponce = str(playlist_items_list_by_playlist_id(service, part='contentDetails', maxResults=1, playlistId=playListId))
 token = findNextToken(apiResponce)
 print token
-findVidID(apiResponce)
+videoId = findVidID(apiResponce)
+getTitle('https://www.youtube.com/watch?v='+videoId)	#https://www.youtube.com/watch?v=gUsHwi4M4xE
 
 while(lastToken == False):
 	apiResponce = str(playlist_items_list_by_playlist_id(service, pageToken=token, part='contentDetails', maxResults=1, playlistId=playListId))
@@ -201,12 +205,20 @@ while(lastToken == False):
 	print apiResponce
 	print "\n"
 	token = findNextToken(apiResponce)
-	findVidID(apiResponce)
-	if((token == "*") | (counter > 5)):
+	videoId = findVidID(apiResponce)
+	print str("https://www.youtube.com/watch?v="+videoId)
+	getTitle(str("https://www.youtube.com/watch?v="+videoId))	#https://www.youtube.com/watch?v=gUsHwi4M4xE
+	if((token == "*")):
 		lastToken = True
+	'''************* For Testing ********************'''
+	
+	'''**********************************************'''	
+	
 	print token
 	counter = counter + 1 
-	print "number of videos", counter
+	print "number of videos", counter + 1
+	
+	getTitle("https://www.youtube.com/watch?v=39RcJg8Auwg&index=22&list=PLYYARuW-EUbEzCScH6unajic_fkaOG7Yv")
 	
 exit()
 
