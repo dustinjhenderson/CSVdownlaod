@@ -125,12 +125,6 @@ def playlist_items_list_by_playlist_id(service, **kwargs):
   ).execute()
   return(results)
 
-def getTitle(url):	#Not working. need to do somthing new
-	youtube = etree.HTML(urllib.urlopen(url).read()) #enter your youtube url here
-	video_title = youtube.xpath("//span[@id='eow-title']/@title") #get xpath using firepath firefox addon
-	print "vid name: "
-	print ''.join(video_title)
-
 def findNextToken (apiResponce):
 	token = ""
 	start = 0
@@ -181,6 +175,26 @@ def getListId():
 	print "***********************************************************\n\n"
 	return enteredLoc
 	
+'''************* edit *******************'''
+def videos_list_by_id(service, **kwargs):
+	kwargs = remove_empty_kwargs(**kwargs)
+	results = service.videos().list(
+	**kwargs
+	).execute()
+	return results
+	
+def getTitle(vidId):
+	results = ""
+	results = str(videos_list_by_id(	service,
+									part='snippet',
+									id=vidId))
+	#print results
+	start = results.find('title\'') + 10
+	end = results[start:].find('\'') + start
+	#print "\n"
+	return results[start:end]
+	
+	
 '''*********************************** Main Part of Script ***********************************'''
 playListId = ""
 fileLocation = ""
@@ -197,7 +211,7 @@ apiResponce = str(playlist_items_list_by_playlist_id(service, part='contentDetai
 token = findNextToken(apiResponce)
 print token
 videoId = findVidID(apiResponce)
-getTitle('https://www.youtube.com/watch?v='+videoId)	#https://www.youtube.com/watch?v=gUsHwi4M4xE
+print getTitle(videoId)
 
 while(lastToken == False):
 	apiResponce = str(playlist_items_list_by_playlist_id(service, pageToken=token, part='contentDetails', maxResults=1, playlistId=playListId))
@@ -206,13 +220,12 @@ while(lastToken == False):
 	print "\n"
 	token = findNextToken(apiResponce)
 	videoId = findVidID(apiResponce)
-	print str("https://www.youtube.com/watch?v="+videoId)
-	getTitle(str("https://www.youtube.com/watch?v="+videoId))	#https://www.youtube.com/watch?v=gUsHwi4M4xE
+	print getTitle(videoId)
 	if((token == "*")):
 		lastToken = True
 	'''************* For Testing ********************'''
 	
-	'''**********************************************'''	
+	'''**********************************************'''
 	
 	print token
 	counter = counter + 1 
